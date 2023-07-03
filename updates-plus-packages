@@ -1,0 +1,89 @@
+#!/bin/bash
+##########################################
+# Part 1        : Updates + Tor Packages
+# Description   : Update and Upgrade the machine in preparation for installation
+#                 + Setting up Tor Packages
+##########################################
+
+# define colors
+clear='\033[0m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+
+#####################################
+# Required System Updates + Upgrades
+#####################################
+
+# Public Key not signed on Rock 4c out of the box
+printf "${blue}\n[~] Update Public Key ...${clear}\n"
+wget -O - apt.radxa.com/focal-stable/public.key | sudo apt-key add -
+
+# System Update + Upgrade (Takes a few mins)
+printf "${blue}\n[~] Updating packages ...${clear}\n"
+apt update -y
+
+printf "${blue}\n[~] Upgrading packages ...${clear}\n"
+apt upgrade -y
+
+###########################################################################
+# ToR Technical: Unattended Upgrades 
+# https://community.torproject.org/relay/setup/guard/debian-ubuntu/updates/
+###########################################################################
+
+printf "\n${purple}[~] Enabling automatic software updates ...${clear}\n"
+
+# Removes existing files in the repo and replaces them
+echo "" > /etc/apt/apt.conf.d/50unattended-upgrades
+cat > /etc/apt/apt.conf.d/50unattended-upgrades << EOL
+Unattended-Upgrade::Allowed-Origins {
+    "${distro_id}:${distro_codename}-security";
+    "TorProject:${distro_codename}";
+};
+Unattended-Upgrade::Package-Blacklist {
+};
+
+Unattended-Upgrade::Automatic-Reboot "true";
+EOL
+
+echo "" > /etc/apt/apt.conf.d/20auto-upgrades
+cat > /etc/apt/apt.conf.d/20auto-upgrades << EOL
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::AutocleanInterval "5";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::Verbose "1";
+EOL
+
+####################################################
+# ToR Technical: Enable Tor Package Repo 
+# https://support.torproject.org/apt/tor-deb-repo/
+####################################################
+
+printf "\n${blue}[~] Configuring Tor Project's repository ...${clear}\n"
+
+# To enable all package managers
+apt install apt-transport-https -y
+
+# create tor.list file
+printf "\n${blue}[~] Creating the tor.list file ...${clear}\n"
+touch /etc/apt/sources.list.d/tor.list
+
+printf "${blue}[~] Writing to the tor.list file ...${clear}\n"
+cat > /etc/apt/sources.list.d/tor.list << EOL
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org focal main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org focal main
+EOL
+
+# add the gpg key
+wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
+
+
+# keyring install
+printf "\n${purple}[~] Installing keyring ...${clear}\n"
+apt update
+apt install tor deb.torproject.org-keyring -y
+
+# reboot system for previos changes to take effect
+printf "\n${purple}[~] Rebooting System, Don't Exit! ...${clear}\n"
+sudo reboot
+
+# NOT SURE IF REBOOT IS NECCESARY YET, NEED TO TEST AND SEE IF IT CAN BE AVOIDED 
