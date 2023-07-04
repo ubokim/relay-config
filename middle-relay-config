@@ -16,9 +16,18 @@ red='\033[0;31m'
 # ####################################################################################
 
 printf "\n${blue}[?] Would you like to set up a Middle/Guard Relay? Press n to create a Bridge instead. [Y/n] : ${clear}"
+read Option1
+if [[ ${Option1} == "Y" || ${Option1} == "y" ]] ; then
+    printf "\n${blue}[~] Lets setup your Middle/Guard Relay ...${clear}\n"
+else
+    printf "\n${blue}[~] Lets setup your Bridge Relay ...${clear}\n"
+    # this will be where the "wget Bridge link will be"
+    exit #exits post bridge inst and doesnt execute the script for middle/guard relay
+fi
 
-
-# torrc file configuration 
+######################################################################################
+# Tor config file setup
+# ####################################################################################
 
 printf "${purple}\n[+] Configuration for torrc file${clear}\n"
 read -p "Nickname : " Nickname
@@ -27,8 +36,8 @@ read -p "ORPort : " ORPort
 read -p "ETH Wallet Address : " Wallet
 
 printf "\n${blue}[?] Would you like to configure bandwidth limits for your relay traffic? [Y/n] : ${clear}"
-read Option1
-if [[ ${Option1} == "Y" || ${Option1} == "y" ]] ; then
+read Option2
+if [[ ${Option2} == "Y" || ${Option2} == "y" ]] ; then
     read -p "Relay Bandwidth Rate (KB/s) : " RelayBandwidthRateSet
     read -p "Relay Bandwidth Burst (KB/s) : " RelayBandwidthBurstSet
     RelayBandwidthRate="RelayBandwidthRate ${RelayBandwidthRateSet}"
@@ -39,8 +48,8 @@ else
 fi
 
 printf "\n${purple}[?] Would you like to add limits for your relay traffic? [Y/n] : ${clear}"
-read Option2
-if [[ ${Option2} == "Y" || ${Option2} == "y" ]] ; then
+read Option3
+if [[ ${Option3} == "Y" || ${Option3} == "y" ]] ; then
     read -p "Accounting Max : " AccountingMaxSet
     read -p "Accounting Start : " AccountingStartSet
     AccountingMax="AccountingMax ${AccountingMaxSet}"
@@ -50,7 +59,8 @@ else
     AccountingStart="#AccountingStart day 00:00"
 fi
 
-# Torrc file config
+# Torrc file config 
+# ** maybe put full config file just in case? 
 printf "\n${blue}[~] Configuring torrc file ...${clear}\n"
 cat > /etc/tor/torrc << EOL
 ## Configuration file for a middle/guard Tor relay 
@@ -127,3 +137,4 @@ systemctl restart tor@default
 
 printf "\n${green}[*] Finished! ${clear}\n\n"
 printf "\n${red}[!] Do not forget to open your chosen ORPort in your router settings!${clear}\n"
+
