@@ -10,6 +10,7 @@ clear='\033[0m'
 blue='\033[1;34m'
 purple='\033[1;35m'
 
+
 #####################################
 # Required System Updates + Upgrades
 #####################################
@@ -83,7 +84,8 @@ apt update
 apt install tor deb.torproject.org-keyring -y
 
 # reboot system for previos changes to take effect
-printf "\n${purple}[~] Rebooting System, Don't Exit! ...${clear}\n"
+printf "\n${red}[!] Rebooting System, Don't Exit! ...${clear}\n"
 sudo reboot
 
 # NOT SURE IF REBOOT IS NECCESARY YET, NEED TO TEST AND SEE IF IT CAN BE AVOIDED 
+
