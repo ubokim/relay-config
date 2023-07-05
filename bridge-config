@@ -19,7 +19,6 @@ red='\033[0;31m'
 # Install obfs4proxy
 printf "${purple}\n[+] Installing obfs4proxy ... ${clear}\n"
 sudo sudo apt-get install obfs4proxy
-ServerTransportListenAddr
 
 # Edit the config for the Bridge file
 printf "${purple}\n[+] Configuration for Bridge file${clear}\n"
